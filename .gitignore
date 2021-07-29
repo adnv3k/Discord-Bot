@@ -127,3 +127,17 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Extensions
+*.pem
+
+# Folders 
+backup/
+
+# Files
+.discordbot
+.instructions to update
+.scratch
+.scratch2
+.ytdownloader
+.notes
