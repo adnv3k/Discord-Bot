@@ -1,17 +1,15 @@
 ## Discord-Bot
-Personal discord bot used to quickly store and retrieve various notes. 
+Personal discord bot, hosted on AWS EC2, used to quickly store and retrieve various notes. 
 
-Simple overview of use/purpose.
 
 ## Description
 
-An in-depth paragraph about your project and overview of use.
-This bot is hosted on AWS in an EC2 instance. The redis library is used to obscure sensitive information. 
+This bot stores information as a shelf saved locally. The redis library is used to obscure sensitive information. 
 
 ## Getting Started
 
 ### Dependencies
-Created with python 3.9
+Created with python 3.9.6
 Full list of dependencies availble in requirements.txt
 
 
