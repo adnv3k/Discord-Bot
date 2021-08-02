@@ -32,12 +32,12 @@ async def send_list_as_code(ctx, list, delay):
 
 #region League
 @bot.command(name='leag')
-async def get_league_logins(ctx, delay):
+async def get_league_logins(ctx, delay=5):
     await ctx.message.delete(delay=delay)
     await send_list_as_code(ctx, league_logins, delay)
 
 @bot.command(name='league')
-async def get_league_logins(ctx, delay):
+async def get_league_logins(ctx, delay=5):
     await ctx.message.delete(delay=delay)
     await send_list_as_code(ctx, league_logins, delay)
 #endregion
