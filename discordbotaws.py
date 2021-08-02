@@ -15,7 +15,7 @@ import redis
 redis_server = redis.Redis()
 token = str(redis_server.get('DISCORD_TOKEN').decode('utf-8'))
 my_server = str(redis_server.get('MY_SERVER').decode('utf-8'))
-league_logins = str(redis_server.get('LEAGUE_LOGINS').decode('utf-8'))
+league_logins = str(redis_server.get('LEAGUE_LOGINS').decode('utf-8')).split('(NEWLINE)')
 cmd = str(redis_server.get('CMD').decode('utf-8')).split('(NEWLINE)')
 
 bot = commands.Bot(command_prefix='.')
@@ -26,24 +26,27 @@ async def on_ready():
     guild = discord.utils.get(bot.guilds, name=my_server)
     print(f'Server:{guild.name}(id: {guild.id})')
 
+async def send_list_as_code(ctx, list, delay):
+    for item in list:
+        await ctx.send(f'```{item}```', delete_after=delay)
+
 #region League
 @bot.command(name='leag')
-async def get_league_logins(ctx):
-    await ctx.message.delete(delay=5)
-    await ctx.send(league_logins, delete_after=5)
+async def get_league_logins(ctx, delay):
+    await ctx.message.delete(delay=delay)
+    await send_list_as_code(ctx, league_logins, delay)
 
 @bot.command(name='league')
-async def get_league_logins(ctx):
-    await ctx.message.delete(delay=5)
-    await ctx.send(league_logins, delete_after=5)
+async def get_league_logins(ctx, delay):
+    await ctx.message.delete(delay=delay)
+    await send_list_as_code(ctx, league_logins, delay)
 #endregion
 
 #region CMD commands
 @bot.command(name='cmd')
 async def get_cmd_shortcuts(ctx,delay=7):
     await ctx.message.delete(delay=delay)
-    for item in cmd:
-        await ctx.send(f'```{item}```', delete_after=delay)
+    await send_list_as_code(ctx, cmd, delay)
     print(f'cmd retrieved at: {str(datetime.datetime.now())}')
 #endregion
 
