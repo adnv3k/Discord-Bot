@@ -1,14 +1,6 @@
-import asyncio
-from asyncio.tasks import sleep
-import os
-# from ytdownloader import get_tracks
 import shelve
 import datetime
 import discord
-from discord import message
-from discord import channel
-from discord.ext.commands.core import command
-from discord.flags import Intents, MessageFlags
 from discord.ext import commands
 import redis
 
@@ -125,4 +117,3 @@ async def help(ctx, delay=30):
     await ctx.send(f'.append_project "(name)" "(appendage)":\nAdds (appendage) to the description of the project (name).\n================================================================================',delete_after=delay)
 
 bot.run(token)
-#TODO 
