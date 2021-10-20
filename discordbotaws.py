@@ -11,6 +11,7 @@ league_logins = str(redis_server.get('LEAGUE_LOGINS').decode('utf-8')).split('(N
 cmd = str(redis_server.get('CMD').decode('utf-8')).split('(NEWLINE)')
 
 bot = commands.Bot(command_prefix='.')
+
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
@@ -18,6 +19,7 @@ async def on_ready():
     guild = discord.utils.get(bot.guilds, name=my_server)
     print(f'Server:{guild.name}(id: {guild.id})')
 
+# Helper function
 async def send_list_as_code(ctx, list, delay):
     for item in list:
         await ctx.send(f'```{item}```', delete_after=delay)
@@ -69,16 +71,6 @@ async def get_projects(ctx,delay=30):
     projects_file.close()
     await ctx.send(f'**END**',delete_after=delay)
 
-#Old code Save in case of bugs. delete later
-@bot.command(name='projectsold')
-async def get_projects(ctx,delay=30):
-    await ctx.message.delete(delay=delay)
-    projects_file = shelve.open('projects')
-    await ctx.send(f'{len(projects_file)} Projects',delete_after=delay)
-    for n in projects_file:
-        await ctx.send(f'```Project: {n}\n{projects_file[n]}```',delete_after=delay)
-    projects_file.close()
-
 @bot.command(name='add_project')
 async def add(ctx, name, info):
     await ctx.message.delete(delay=5)
@@ -86,7 +78,7 @@ async def add(ctx, name, info):
     projects_file = shelve.open('projects')
     projects_file[name] = info
     projects_file.close()
-    await ctx.send(f'Added "{name}" to projects.', delete_after=7)
+    await ctx.send(f'Added "**{name}**" to projects.\n{info}', delete_after=7)
 
 @bot.command(name='remove_project')
 async def remove_project(ctx, name):
@@ -95,7 +87,7 @@ async def remove_project(ctx, name):
     projects_file = shelve.open('projects')
     del projects_file[name]
     projects_file.close()
-    await ctx.send(f'"{name}" removed from projects.',delete_after=7)
+    await ctx.send(f'"{name}" removed from projects.', delete_after=7)
 
 @bot.command(name='append_project')
 async def append_project(ctx, name, appendage):
@@ -104,16 +96,25 @@ async def append_project(ctx, name, appendage):
     projects_file = shelve.open('projects')
     projects_file[name] += f'\n{appendage}'
     projects_file.close()
-    await ctx.send(f'"{appendage}" has been added to "{name}."',delete_after=7)
+    await ctx.send(f'"{appendage}" has been added to "{name}."', delete_after=7)
 #endregion
 
 @bot.command(name='commands')
 async def help(ctx, delay=30):
     await ctx.message.delete(delay=delay)
-    await ctx.send(f'4 Commands', delete_after=delay)
-    await ctx.send(f'.projects (delay):\nDisplays all items in the projects list for (delay) seconds.\n================================================================================',delete_after=delay)
-    await ctx.send(f'.add_project "(name)" "(description)":\nAdds a project to the projects list with (name) and (description).\n================================================================================',delete_after=delay)
-    await ctx.send(f'.remove_project "(name)":\nRemoves a project from the projects list by (name).\n================================================================================',delete_after=delay)
-    await ctx.send(f'.append_project "(name)" "(appendage)":\nAdds (appendage) to the description of the project (name).\n================================================================================',delete_after=delay)
+    await ctx.send(
+        f'4 Commands', delete_after=delay)
+    await ctx.send(
+        f'**.projects (delay)**\nDisplays all items in the projects list for (delay) seconds.',
+        delete_after=delay)
+    await ctx.send(
+        f'**.add_project "(name)" "(description)"**\nAdds a project to the projects list with (name) and (description).',
+        delete_after=delay)
+    await ctx.send(
+        f'**.remove_project "(name)"**\nRemoves a project from the projects list by (name).',
+        delete_after=delay)
+    await ctx.send(
+        f'**.append_project "(name)" "(appendage)"**\nAdds (appendage) to the description of the project (name).',
+        delete_after=delay)
 
 bot.run(token)
