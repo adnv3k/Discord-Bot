@@ -91,6 +91,15 @@ async def remove_project(ctx, name):
     projects_file.close()
     await ctx.send(f'"{name}" removed from projects.', delete_after=7)
 
+@bot.command(name='delete_project')
+async def remove_project(ctx, name):
+    await ctx.message.delete(delay=7)
+    name = name.upper()
+    projects_file = shelve.open('projects')
+    del projects_file[name]
+    projects_file.close()
+    await ctx.send(f'"{name}" removed from projects.', delete_after=7)
+
 @bot.command(name='append_project')
 async def append_project(ctx, name, appendage):
     await ctx.message.delete(delay=7)
