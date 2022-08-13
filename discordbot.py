@@ -4,16 +4,17 @@ import shelve
 import datetime
 import os
 import discord
+
 from discord.ext import commands
 
-# import redis
+# import redis depreciated 
 
-# redis_server = redis.Redis()
 token = os.environ.get('DISCORD_TOKEN')
 my_server = os.environ.get('MY_SERVER')
 league_logins = os.environ.get('LEAGUE_LOGINS')
 
 # depreciated code from when using a redis server to serve secrets
+# redis_server = redis.Redis()
 # token = str(redis_server.get('DISCORD_TOKEN').decode('utf-8'))
 # my_server = str(redis_server.get('MY_SERVER').decode('utf-8'))
 # league_logins = str(redis_server.get('LEAGUE_LOGINS').decode('utf-8')).split('(NEWLINE)')
@@ -24,9 +25,9 @@ bot = commands.Bot(command_prefix='.')
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
-    guild = discord.utils.find(lambda g: g.name == my_server, bot.guilds)
-    guild = discord.utils.get(bot.guilds, name=my_server)
-    print(f'Server:{guild.name}(id: {guild.id})')
+    # guild = discord.utils.find(lambda g: g.name == my_server, bot.guilds)
+    # guild = discord.utils.get(bot.guilds, name=my_server)
+    # print(f'Server:{guild.name}(id: {guild.id})')
 
 # Helper function
 async def send_list_as_code(ctx, list, delay):
