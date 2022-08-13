@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 13,
+            "activePatchIndex": 15,
             "patches": [
                 {
                     "date": 1660355570039,
@@ -60,6 +60,14 @@
                 {
                     "date": 1660357645518,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -6,9 +6,9 @@\n import discord\r\n \r\n from discord.ext import commands\r\n \r\n-# import redis\r\n+# import redis depr\r\n \r\n token = os.environ.get('DISCORD_TOKEN')\r\n my_server = os.environ.get('MY_SERVER')\r\n league_logins = os.environ.get('LEAGUE_LOGINS')\r\n"
+                },
+                {
+                    "date": 1660360037139,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -6,14 +6,14 @@\n import discord\r\n \r\n from discord.ext import commands\r\n \r\n-# import redis depr\r\n+# import redis depreciated \r\n \r\n-token = os.environ.get('DISCORD_TOKEN')\r\n-my_server = os.environ.get('MY_SERVER')\r\n-league_logins = os.environ.get('LEAGUE_LOGINS')\r\n-\r\n+# token = os.environ.get('DISCORD_TOKEN')\r\n+# my_server = os.environ.get('MY_SERVER')\r\n+# league_logins = os.environ.get('LEAGUE_LOGINS')\r\n+# league_logins = os.environ.get('LEAGUE_LOGINS')\r\n # depreciated code from when using a redis server to serve secrets\r\n # redis_server = redis.Redis()\r\n # token = str(redis_server.get('DISCORD_TOKEN').decode('utf-8'))\r\n # my_server = str(redis_server.get('MY_SERVER').decode('utf-8'))\r\n"
+                },
+                {
+                    "date": 1660360076853,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -8,12 +8,12 @@\n from discord.ext import commands\r\n \r\n # import redis depreciated \r\n \r\n-# token = os.environ.get('DISCORD_TOKEN')\r\n-# my_server = os.environ.get('MY_SERVER')\r\n-# league_logins = os.environ.get('LEAGUE_LOGINS')\r\n-# league_logins = os.environ.get('LEAGUE_LOGINS')\r\n+token = os.environ..get('DISCORD_TOKEN')\r\n+my_server = os.environ.get('MY_SERVER')\r\n+league_logins = os.environ.get('LEAGUE_LOGINS')\r\n+\r\n # depreciated code from when using a redis server to serve secrets\r\n # redis_server = redis.Redis()\r\n # token = str(redis_server.get('DISCORD_TOKEN').decode('utf-8'))\r\n # my_server = str(redis_server.get('MY_SERVER').decode('utf-8'))\r\n"
                 }
             ],
             "date": 1660355570039,
