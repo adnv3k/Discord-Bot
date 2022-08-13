@@ -12,6 +12,7 @@ from discord.ext import commands
 token = os.environ.get('DISCORD_TOKEN')
 my_server = os.environ.get('MY_SERVER')
 league_logins = os.environ.get('LEAGUE_LOGINS')
+league_logins = [league_logins]
 
 # depreciated code from when using a redis server to serve secrets
 # redis_server = redis.Redis()
