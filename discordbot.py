@@ -2,15 +2,22 @@ import asyncio
 from asyncio.tasks import sleep
 import shelve
 import datetime
+import os
 import discord
 from discord.ext import commands
-import redis
 
-redis_server = redis.Redis()
-token = str(redis_server.get('DISCORD_TOKEN').decode('utf-8'))
-my_server = str(redis_server.get('MY_SERVER').decode('utf-8'))
-league_logins = str(redis_server.get('LEAGUE_LOGINS').decode('utf-8')).split('(NEWLINE)')
-cmd = str(redis_server.get('CMD').decode('utf-8')).split('(NEWLINE)')
+# import redis
+
+# redis_server = redis.Redis()
+token = os.environ.get('DISCORD_TOKEN')
+my_server = os.environ.get('MY_SERVER')
+league_logins = os.environ.get('LEAGUE_LOGINS')
+
+# depreciated code from when using a redis server to serve secrets
+# token = str(redis_server.get('DISCORD_TOKEN').decode('utf-8'))
+# my_server = str(redis_server.get('MY_SERVER').decode('utf-8'))
+# league_logins = str(redis_server.get('LEAGUE_LOGINS').decode('utf-8')).split('(NEWLINE)')
+# cmd = str(redis_server.get('CMD').decode('utf-8')).split('(NEWLINE)')
 
 bot = commands.Bot(command_prefix='.')
 
