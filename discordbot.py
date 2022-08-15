@@ -1,9 +1,9 @@
 import asyncio
 from asyncio.tasks import sleep
+from logging import exception
 import shelve
 from datetime import datetime
 from datetime import timedelta
-import string
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import tzlocal
 import os
@@ -11,43 +11,56 @@ import discord
 from discord.ext import commands
 from decouple import config
 
-# token = config('DISCORD_TOKEN')
-# my_server = config('MY_SERVER')
-# league_logins = config('LEAGUE_LOGINS')
-sched = AsyncIOScheduler(timezone=str(tzlocal.get_localzone()))
-sched.start()
 
-# import redis depreciated 
+try:
+    token = os.environ.get('DISCORD_TOKEN')
+    my_server = os.environ.get('MY_SERVER')
+    league_logins = os.environ.get('LEAGUE_LOGINS')
+    if token == None:
+        exception()
+except:
+    token = config('DISCORD_TOKEN')
+    my_server = config('MY_SERVER')
+    league_logins = config('LEAGUE_LOGINS')
 
-token = os.environ.get('DISCORD_TOKEN')
-my_server = os.environ.get('MY_SERVER')
-league_logins = os.environ.get('LEAGUE_LOGINS')
 league_logins = [league_logins]
 
-# depreciated code from when using a redis server to serve secrets
-# redis_server = redis.Redis()
-# token = str(redis_server.get('DISCORD_TOKEN').decode('utf-8'))
-# my_server = str(redis_server.get('MY_SERVER').decode('utf-8'))
-# league_logins = str(redis_server.get('LEAGUE_LOGINS').decode('utf-8')).split('(NEWLINE)')
-# cmd = str(redis_server.get('CMD').decode('utf-8')).split('(NEWLINE)')
+sched = AsyncIOScheduler(timezone=str(tzlocal.get_localzone()))
+sched.start()
 
 bot = commands.Bot(command_prefix='.')
 
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
+    channel = bot.get_channel(id=1008634623938539610)
+    await channel.send(f"Online at {str(datetime.now()).split('.')[0]}")
     # guild = discord.utils.find(lambda g: g.name == my_server, bot.guilds)
     # guild = discord.utils.get(bot.guilds, name=my_server)
     # print(f'Server:{guild.name}(id: {guild.id})')
 
-# Helper function
-# For projects command
-async def send_list_as_code(ctx, list, delay):
-    for item in list:
-        await ctx.send(f'```{item}```', delete_after=delay)
+#region Reminder
+@bot.command(name='remindme')
+async def set_reminder(ctx, reminder, time, delay=7):
+    await ctx.message.delete(delay=delay)
+    if time[0] == " ":
+        return  
+
+    now = datetime.now()
+    seconds = await process_time(time)
+    end_date = now + timedelta(seconds=seconds+1) # stop interval just before the 2nd run
+    sched.add_job(
+        remind, 
+        kwargs={"msg":reminder, "id":ctx.author.id},
+        trigger='interval', 
+        seconds=seconds, 
+        start_date=now, 
+        end_date=end_date,
+        name=reminder)
+    await ctx.send(f'{reminder} has been set for {end_date}.', delete_after=delay)
 
 # For reminders
-async def process_time(ctx, time):
+async def process_time(time):
     '''
     "in 1 hr"
     "in 30 seconds"
@@ -66,15 +79,14 @@ async def process_time(ctx, time):
     tomorrow
     
     '''
-    # time = "in 1h 23m 3s"
-    # in HH:MM:SS
-    # time = "in 1 hour and 45 minutes and 15 seconds"
     time = time.split(" ")
     seconds = 0
-    for ele in time[1:]:
+    for ele in time:
         for i, char in enumerate(ele):
             if char.isalpha():
-                if char.lower() == "h":
+                if char.lower() == "d":
+                    seconds += int(ele[:i]) * 60 * 60 * 24
+                elif char.lower() == "h":
                     seconds += int(ele[:i]) * 60 * 60
                 elif char.lower() == 'm':
                     seconds += int(ele[:i]) * 60
@@ -83,38 +95,28 @@ async def process_time(ctx, time):
     return seconds
 
 #remind in reminders channel
-async def remind(ctx, msg, id):
-    await ctx.send(f'**REMINDER: ** <@{id}> {msg}', delete_after=5)
+async def remind(msg, id):
+    channel = bot.get_channel(id=1008635857252646962)
+    await channel.send(f'**REMINDER: ** <@{id}> {msg}')
 
 
-#region Reminder
-@bot.command(name='remindme')
-async def set_reminder(ctx, reminder, time, delay=7):
+@bot.command(name='reminders')
+async def get_reminders(ctx, delay=15):
     await ctx.message.delete(delay=delay)
-    if time[0] == " ":
-        return  
-    # .remindme "take out garbage" "in 1 hr"
-    # reminders = shelve.open('reminders')
-    # reminders[reminder] = datetime.timestamp(time)
-    # reminders.close()
+    jobs = sched.get_jobs()
+    if not jobs:
+        await ctx.send(f'No reminders.', delete_after=delay)
+    else:
+        for job in jobs:
+            await ctx.send(f'**Reminders:**', delete_after=delay)
+            await ctx.send(f'```{job.name}\n{job.next_run_time}```', delete_after=delay)
+#endregion
 
-    now = datetime.now()
-    seconds = await process_time(ctx, time)
-    print(ctx.author.id)
-    end_date = now + timedelta(seconds=seconds+1) # stop interval just before the 2nd run
-    sched.add_job(
-        remind, 
-        kwargs={"ctx":ctx, "msg":reminder, "id":ctx.author.id},
-        trigger='interval', 
-        seconds=seconds, 
-        start_date=now, 
-        end_date=end_date)
-
-    await ctx.send(f'{reminder} has been set for {end_date}.', delete_after=delay)
-
-async def get_reminders(ctx, delay=30):
-    await ctx.send(f'reminders:', delete_after=delay)
-
+# Clear msgs
+@bot.command(name='clear')
+async def delete_messages(ctx, amount=10, delay=7):
+    await ctx.message.delete(delay=delay)
+    await ctx.channel.purge(limit=amount+1)
 
 #region League
 @bot.command(name='leag')
@@ -135,6 +137,7 @@ async def get_cmd_shortcuts(ctx,delay=7):
     await send_list_as_code(ctx, cmd, delay)
     print(f'cmd retrieved at: {str(datetime.now())}')
 #endregion
+
 
 #region Projects
 @bot.command(name='projects')
@@ -198,13 +201,18 @@ async def append_project(ctx, name, appendage):
     projects_file[name] += f'\n{appendage}'
     projects_file.close()
     await ctx.send(f'"{appendage}" has been added to "{name}."', delete_after=7)
+
+# Helper function for projects command
+async def send_list_as_code(ctx, list, delay):
+    for item in list:
+        await ctx.send(f'```{item}```', delete_after=delay)
 #endregion
 
 @bot.command(name='commands')
 async def help(ctx, delay=30):
     await ctx.message.delete(delay=delay)
     await ctx.send(
-        f'4 Commands', delete_after=delay)
+        f'7 Commands', delete_after=delay)
     await ctx.send(
         f'**.projects (delay)**\nDisplays all items in the projects list for (delay) seconds.',
         delete_after=delay)
@@ -217,5 +225,13 @@ async def help(ctx, delay=30):
     await ctx.send(
         f'**.append_project "(name)" "(appendage)"**\nAdds (appendage) to the description of the project (name).',
         delete_after=delay)
-
+    await ctx.send(
+        f'**.remindme "(reminder)" "(xd xh xm xs)"**\nAdds (reminder) to time in format (d h m s)',
+        delete_after=delay)
+    await ctx.send(
+        f'**.reminders**\nDisplays all reminders.',
+        delete_after=delay)
+    await ctx.send(
+        f'**.clear (number of msgs to delete)**\nDeletes (number of msgs to delete) in channel that command was called in.',
+        delete_after=delay)
 bot.run(token)
