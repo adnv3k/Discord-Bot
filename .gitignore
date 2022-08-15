@@ -130,3 +130,5 @@ dmypy.json
 
 venv
 .lh
+.lh/discordbot.py.json
+test.py

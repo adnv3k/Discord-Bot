@@ -1,11 +1,21 @@
 import asyncio
 from asyncio.tasks import sleep
 import shelve
-import datetime
+from datetime import datetime
+from datetime import timedelta
+import string
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import tzlocal
 import os
 import discord
-
 from discord.ext import commands
+from decouple import config
+
+# token = config('DISCORD_TOKEN')
+# my_server = config('MY_SERVER')
+# league_logins = config('LEAGUE_LOGINS')
+sched = AsyncIOScheduler(timezone=str(tzlocal.get_localzone()))
+sched.start()
 
 # import redis depreciated 
 
@@ -31,9 +41,80 @@ async def on_ready():
     # print(f'Server:{guild.name}(id: {guild.id})')
 
 # Helper function
+# For projects command
 async def send_list_as_code(ctx, list, delay):
     for item in list:
         await ctx.send(f'```{item}```', delete_after=delay)
+
+# For reminders
+async def process_time(ctx, time):
+    '''
+    "in 1 hr"
+    "in 30 seconds"
+    in 1 hour and 45 minutes
+    in 3 hours
+    tomorrow
+
+    '''
+    '''
+    seconds, sec, secs, s
+    minutes, min, mins, m
+    hours, hrs, hr, h
+    days, day, d
+    week, weeks, wk
+    month, months
+    tomorrow
+    
+    '''
+    # time = "in 1h 23m 3s"
+    # in HH:MM:SS
+    # time = "in 1 hour and 45 minutes and 15 seconds"
+    time = time.split(" ")
+    seconds = 0
+    for ele in time[1:]:
+        for i, char in enumerate(ele):
+            if char.isalpha():
+                if char.lower() == "h":
+                    seconds += int(ele[:i]) * 60 * 60
+                elif char.lower() == 'm':
+                    seconds += int(ele[:i]) * 60
+                elif char.lower() == 's':
+                    seconds += int(ele[:i])
+    return seconds
+
+#remind in reminders channel
+async def remind(ctx, msg, id):
+    await ctx.send(f'**REMINDER: ** <@{id}> {msg}', delete_after=5)
+
+
+#region Reminder
+@bot.command(name='remindme')
+async def set_reminder(ctx, reminder, time, delay=7):
+    await ctx.message.delete(delay=delay)
+    if time[0] == " ":
+        return  
+    # .remindme "take out garbage" "in 1 hr"
+    # reminders = shelve.open('reminders')
+    # reminders[reminder] = datetime.timestamp(time)
+    # reminders.close()
+
+    now = datetime.now()
+    seconds = await process_time(ctx, time)
+    print(ctx.author.id)
+    end_date = now + timedelta(seconds=seconds+1) # stop interval just before the 2nd run
+    sched.add_job(
+        remind, 
+        kwargs={"ctx":ctx, "msg":reminder, "id":ctx.author.id},
+        trigger='interval', 
+        seconds=seconds, 
+        start_date=now, 
+        end_date=end_date)
+
+    await ctx.send(f'{reminder} has been set for {end_date}.', delete_after=delay)
+
+async def get_reminders(ctx, delay=30):
+    await ctx.send(f'reminders:', delete_after=delay)
+
 
 #region League
 @bot.command(name='leag')
@@ -52,7 +133,7 @@ async def get_league_logins(ctx, delay=5):
 async def get_cmd_shortcuts(ctx,delay=7):
     await ctx.message.delete(delay=delay)
     await send_list_as_code(ctx, cmd, delay)
-    print(f'cmd retrieved at: {str(datetime.datetime.now())}')
+    print(f'cmd retrieved at: {str(datetime.now())}')
 #endregion
 
 #region Projects
