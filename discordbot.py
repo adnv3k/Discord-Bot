@@ -57,7 +57,7 @@ async def set_reminder(ctx, reminder, time, delay=7):
         start_date=now, 
         end_date=end_date,
         name=reminder)
-    await ctx.send(f'{reminder} has been set for {end_date}.', delete_after=delay)
+    await ctx.send(f'`{reminder} has been set for {end_date}.', delete_after=delay)
 
 # For reminders
 async def process_time(time):
