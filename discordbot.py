@@ -107,8 +107,8 @@ async def get_reminders(ctx, delay=15):
     if not jobs:
         await ctx.send(f'No reminders.', delete_after=delay)
     else:
+        await ctx.send(f'**Reminders:**', delete_after=delay)
         for job in jobs:
-            await ctx.send(f'**Reminders:**', delete_after=delay)
             await ctx.send(f'```{job.name}\n{job.next_run_time}```', delete_after=delay)
 #endregion
 
