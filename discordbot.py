@@ -25,7 +25,7 @@ except:
 
 league_logins = [league_logins]
 
-sched = AsyncIOScheduler(timezone=str(tzlocal.get_localzone()))
+sched = AsyncIOScheduler(timezone='America/Los_Angeles')
 sched.start()
 
 bot = commands.Bot(command_prefix='.')
